@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<style>
+  .canvas {
+    border: "5px";
+  }
+</style>
+<canvas width = "750px" height="500px" style="border: 1px solid"></canvas>
+<body>
+<script src="ballBounce.js"></script>
+  <script>
+    var draw_area = document.querySelector("canvas");
+    var draw_context = draw_area.getContext("2d");
+
+    document.body.appendChild(draw_area);
+
+    document.body.style.background = "grey";
+    var balls = [];
+     //Finally ball
+    var radius = 15;
+    var upperBoundry = radius;
+    var lowerBoundry = draw_area.height;
+    var rightBoundry = draw_area.width - radius;
+    var leftBoundry = radius;
+    var gravity = new Vector(0, 5.4);
+    var speed = new Vector(0, 3.5);
+    var fps = 30;
+    var interval = 500 / fps;
+
+    function randomColor() {
+      var colors = ["red", "magenta", "indigo", "green", "purple", "blue"];
+      var randomNumber = Math.floor(Math.random() * colors.length);
+      return colors[randomNumber];
+    }
+
+    document.body.addEventListener("click", function(event) {
+      var new_x = event.pageX;
+      var new_y = event.pageY;
+
+      var new_ball = new BouncyBall(new_x, new_y, radius, randomColor(), speed);
+      balls.push(new_ball);
+
+    });
+    function updateBalls() {
+
+      balls.forEach(function(ball, n) {
+
+        ball.speed = ball.speed.add(gravity);
+        var new_pos = ball.pos.add(ball.speed);
+        ball.updatePos(new_pos.x, new_pos.y);
+
+        if(ball.pos.x < leftBoundry || ball.pos.x > rightBoundry) {
+          ball.speed.x *= -1;
+        }
+
+        if(ball.pos.y >= lowerBoundry) {
+          ball.speed.y *= -0.85;
+          ball.speed.x *= 0.96;
+          ball.pos.y = lowerBoundry;
+
+        } else if (ball.pos.y < upperBoundry) {
+          ball.speed.y *= -1;
+        }
+      });
+    }
+
+    //now draw it
+    function draw() {
+      setTimeout(function() {
+        window.requestAnimationFrame(draw);
+        updateBalls();
+        draw_context.clearRect(0, 0, draw_area.width,
+                                    draw_area.height);
+
+        balls.forEach(function(ball) {
+
+        //actual canvas graphics part
+        //clear up everything to refresh
+          draw_context.beginPath();
+          draw_context.arc(ball.pos.x, ball.pos.y - ball.radius, ball.radius,
+                           0, 2 * Math.PI, false);
+          draw_context.fillStyle = ball.color;
+          draw_context.fill();
+        });
+        }, interval);
+    }
+  draw();
+  </script>
+</body>
+</html>
